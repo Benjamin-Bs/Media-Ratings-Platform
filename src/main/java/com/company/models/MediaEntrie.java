@@ -1,11 +1,11 @@
 package com.company.models;
 
+import com.company.Interfaces.IIdentifiable;
 import lombok.Getter;
 import lombok.Setter;
 
-public abstract class MediaEntrie {
+public abstract class MediaEntrie implements IIdentifiable {
 
-    @Getter
     @Setter
     private int id;
     @Getter
@@ -38,6 +38,12 @@ public abstract class MediaEntrie {
         this.genre = genre;
         this.ageRestriction = ageRestriction;
         this.creatorID = creatorID;
+    }
+
+
+    @Override
+    public int getId(){
+        return id;
     }
 
     public abstract MediaType getMediaType();

@@ -1,9 +1,40 @@
 package com.company.models;
 
-public class User {
+import com.company.Interfaces.IIdentifiable;
+import lombok.Getter;
+import lombok.Setter;
 
-    private int userId;
+import java.util.ArrayList;
+import java.util.List;
+
+public class User implements IIdentifiable {
+
+
+    @Setter
+    private int id;
+    @Getter
+    @Setter
     private String username;
+
+    @Getter
+    @Setter
     private String password;
+
+    @Getter
+    @Setter
+    private List<Integer> favMediaIds;
+
+    public User(int id, String username, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+
+        this.favMediaIds = new ArrayList<>();
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
 
 }
