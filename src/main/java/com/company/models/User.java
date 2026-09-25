@@ -22,15 +22,20 @@ public class User implements IIdentifiable {
 
     @Getter
     @Setter
+    private String token;
+
+    @Getter
+    @Setter
     private List<Integer> favMediaIds;
 
-    public User(int id, String username, String password) {
-        this.id = id;
+    public User(String username, String password) {
         this.username = username;
         this.password = password;
 
         this.favMediaIds = new ArrayList<>();
     }
+
+
 
     @Override
     public int getId() {
