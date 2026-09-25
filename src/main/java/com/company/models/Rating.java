@@ -32,12 +32,15 @@ public class Rating implements IIdentifiable, ILikeable {
     @Setter
     private Instant timeStamp;
 
+    @Getter
+    @Setter
     private RatingStatus ratingStatus;
 
+    @Getter
+    @Setter
     private List<Integer> likedUserId;
 
-    public Rating(int id, int userId, int mediaEntryId, int starValue, String comment) {
-        this.id = id;
+    public Rating(int userId, int mediaEntryId, int starValue, String comment) {
         this.userId = userId;
         this.mediaEntryId = mediaEntryId;
         this.starValue = starValue;
@@ -57,8 +60,16 @@ public class Rating implements IIdentifiable, ILikeable {
         return this.ratingStatus == RatingStatus.CONFIRMED;
     }
 
+    public boolean hasUserLiked(int userId) {
+        return this.likedUserId != null && this.likedUserId.contains(userId);
+    }
+
+    public List<Integer> getLikedByUserIds() {
+        return this.likedUserId;
+    }
+
     @Override
-    public int getLikeCount(){
+    public int getLikeCount() {
         return likedUserId.size();
     }
 
