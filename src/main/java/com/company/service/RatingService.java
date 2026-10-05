@@ -1,6 +1,6 @@
 package com.company.service;
 
-import com.company.data.RatingRepository;
+import com.company.repository.RatingRepository;
 import com.company.models.Rating;
 import com.company.models.User;
 

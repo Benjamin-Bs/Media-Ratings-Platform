@@ -1,17 +1,24 @@
 package com.company;
 
 
-import com.company.data.InMemoryUserRepository;
-import com.company.data.UserRepository;
+import com.company.repository.InMemoryUserRepository;
+import com.company.repository.UserRepository;
 import com.company.models.MediaEntrie;
 import com.company.models.Movie;
 import com.company.models.User;
 import com.company.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Scanner;
 
 public class Main {
-    static void main() {
+    static void main() throws IOException {
 
         Scanner sc = new Scanner(System.in);
 
@@ -49,5 +56,28 @@ public class Main {
             System.err.println("Der Fehler: " + e.getMessage());
         }
 
+        User us = new User("Bib","passwd");
+
+        ObjectMapper om = new ObjectMapper();
+        String json = om.writeValueAsString(us);
+        System.out.println(json);
+        //om.readValue(json, User.class);
+
+
+
+        HttpServer httpServer = HttpServer.create(new InetSocketAddress(8080),10);
+
+        httpServer.createContext("/users", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+
+            }
+        });
+
+        httpServer.start();
+
+
+
     }
+
 }

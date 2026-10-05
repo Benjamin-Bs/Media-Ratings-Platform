@@ -1,6 +1,8 @@
-package com.company.data;
+package com.company.repository;
 
 import com.company.models.User;
+
+import java.util.List;
 
 public interface UserRepository {
 
@@ -17,5 +19,7 @@ public interface UserRepository {
      User updateUser(User user);
 
      void deleteUser(int userId);
+
+     List<User> findAll();
 
 }

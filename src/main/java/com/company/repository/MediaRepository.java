@@ -1,8 +1,7 @@
-package com.company.data;
+package com.company.repository;
 
 import com.company.models.MediaEntrie;
 
-import javax.print.attribute.standard.Media;
 import java.util.List;
 
 public interface MediaRepository {

@@ -4,6 +4,9 @@ import com.company.Interfaces.IIdentifiable;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class MediaEntrie implements IIdentifiable {
 
     @Setter
@@ -15,13 +18,12 @@ public abstract class MediaEntrie implements IIdentifiable {
     @Setter
     private String description;
 
-    //MediaType
     @Getter
     @Setter
     private int releaseYear;
     @Getter
     @Setter
-    private String genre;
+    private List<String> genres;
     @Getter
     @Setter
     private int ageRestriction;
@@ -30,19 +32,26 @@ public abstract class MediaEntrie implements IIdentifiable {
     private int creatorID;
 
 
-    public MediaEntrie(int id, String title, String description, int releaseYear, String genre, int ageRestriction, int creatorID) {
-        this.id = id;
+    public MediaEntrie(String title, String description, int releaseYear, List<String> genre, int ageRestriction, int creatorID) {
         this.title = title;
         this.description = description;
         this.releaseYear = releaseYear;
-        this.genre = genre;
+        if (genres != null) {
+            this.genres = genres;
+        } else {
+            this.genres = new ArrayList<>();
+        }
         this.ageRestriction = ageRestriction;
         this.creatorID = creatorID;
     }
 
+    public MediaEntrie(int id, String title, String description, int releaseYear, List<String> genres, int ageRestriction, int creatorID) {
+        this(title, description, releaseYear, genres, ageRestriction, creatorID);
+        this.id = id;
+    }
 
     @Override
-    public int getId(){
+    public int getId() {
         return id;
     }
 

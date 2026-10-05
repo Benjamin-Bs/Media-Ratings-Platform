@@ -35,7 +35,10 @@ public class User implements IIdentifiable {
         this.favMediaIds = new ArrayList<>();
     }
 
-
+    public User(int id, String username, String password) {
+        this(username, password);
+        this.id = id;
+    }
 
     @Override
     public int getId() {

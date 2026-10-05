@@ -50,6 +50,11 @@ public class Rating implements IIdentifiable, ILikeable {
         this.timeStamp = Instant.now();
     }
 
+    public Rating(int id, int userId, int mediaEntryId, int starValue, String comment) {
+        this(userId, mediaEntryId, starValue, comment);
+        this.id = id;
+    }
+
     @Override
     public int getId() {
         return id;
@@ -57,7 +62,11 @@ public class Rating implements IIdentifiable, ILikeable {
 
 
     public boolean isConfirmed() {
-        return this.ratingStatus == RatingStatus.CONFIRMED;
+        if (this.ratingStatus == RatingStatus.CONFIRMED) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean hasUserLiked(int userId) {

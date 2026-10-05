@@ -1,8 +1,10 @@
 package com.company.service;
 
-import com.company.data.MediaRepository;
+import com.company.repository.MediaRepository;
 import com.company.models.MediaEntrie;
 import com.company.models.User;
+
+import java.util.List;
 
 public class MediaService {
 
@@ -31,6 +33,8 @@ public class MediaService {
         mediaRepository.deleteMedia(mediaId);
     }
 
-
+    public List<MediaEntrie> getAllMedia() {
+        return this.mediaRepository.getAllMedia();
+    }
 
 }

@@ -1,8 +1,9 @@
 package com.company.service;
 
-import com.company.data.UserRepository;
+import com.company.repository.UserRepository;
 import com.company.models.User;
 
+import java.util.List;
 import java.util.UUID;
 
 public class UserService {
@@ -53,6 +54,10 @@ public class UserService {
             throw new Exception("User not found");
         }
         return user;
+    }
+
+    public List<User> getAllUsers() {
+        return this.userRepository.findAll();
     }
 
 }
