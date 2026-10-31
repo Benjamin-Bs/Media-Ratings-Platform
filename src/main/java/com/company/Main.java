@@ -49,8 +49,6 @@ public class Main {
             System.out.println("Willkommen " + loggedInUser.getUsername());
 
 
-            MediaEntrie movie = new Movie(1, "La La Land", "Its a movie", 2012, "Musical", 16, 34);
-
 
         } catch (Exception e) {
             System.err.println("Der Fehler: " + e.getMessage());
@@ -61,7 +59,7 @@ public class Main {
         ObjectMapper om = new ObjectMapper();
         String json = om.writeValueAsString(us);
         System.out.println(json);
-        //om.readValue(json, User.class);
+        om.readValue(json, User.class);
 
 
 
