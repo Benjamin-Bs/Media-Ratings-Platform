@@ -4,6 +4,7 @@ import com.company.models.User;
 import com.company.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +12,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class UserController {
+public class UserController implements HttpHandler {
 
     private final UserService userService;
     private final ObjectMapper objectMapper;
@@ -21,21 +22,22 @@ public class UserController {
         this.objectMapper = new ObjectMapper();
     }
 
+    @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String method = httpExchange.getRequestMethod();
         String path = httpExchange.getRequestURI().getPath();
 
         try {
-            if (method.equals("GET")) {
-                if (path.equals("/users")) {
+            if ("GET".equalsIgnoreCase(method)) {
+                if ("/users".equals(path) || "/users/".equals(path)) {
                     List<User> users = userService.getAllUsers();
                     sendResponse(httpExchange, 200, objectMapper.writeValueAsString(users));
                     return;
                 }
             }
 
-            if (method.equals("POST")) {
-                if (path.equals("/users/register")) {
+            if ("POST".equalsIgnoreCase(method)) {
+                if ("/users/register".equals(path)) {
                     String requestBody = readRequestBody(httpExchange);
                     User newUser = objectMapper.readValue(requestBody, User.class);
 
@@ -44,7 +46,7 @@ public class UserController {
                     return;
                 }
 
-                if (path.equals("/users/login")) {
+                if ("/users/login".equals(path)) {
                     String requestBody = readRequestBody(httpExchange);
                     User loginUser = objectMapper.readValue(requestBody, User.class);
 

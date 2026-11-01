@@ -1,6 +1,7 @@
 package com.company.repository;
 
 import com.company.models.Rating;
+import com.company.models.User;
 
 import java.util.List;
 
@@ -17,5 +18,7 @@ public interface RatingRepository {
     Rating updateRating(Rating rating);
 
     void deleteRating(int ratingId);
+
+    List<Rating> findAll();
 
 }

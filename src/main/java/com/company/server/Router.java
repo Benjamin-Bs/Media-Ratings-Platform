@@ -1,6 +1,5 @@
 package com.company.server;
 
-import com.company.service.UserService;
 import com.company.service.controller.MediaController;
 import com.company.service.controller.RatingController;
 import com.company.service.controller.UserController;
@@ -27,60 +26,25 @@ public class Router implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
-        String method = exchange.getRequestMethod();
 
         try {
-            if (path.startsWith("/api/media")) {
-                handleMediaRoutes(exchange, path, method);
-            } else if (path.startsWith("/api/users")) {
-                handleUserRoutes(exchange, path, method);
-            } else if (path.startsWith("/api/ratings")) {
-                handleRatingRoutes(exchange, path, method);
+            // Leitet alle Anfragen mit /users oder /api/users direkt an den UserController weiter
+            if (path.startsWith("/api/users") || path.startsWith("/users")) {
+                userController.handle(exchange);
+            }
+            // Leitet alle Anfragen mit /media oder /api/media direkt an den MediaController weiter
+            else if (path.startsWith("/api/media") || path.startsWith("/media")) {
+                mediaController.handle(exchange);
+            }
+            // Leitet alle Anfragen mit /ratings oder /api/ratings direkt an den RatingController weiter
+            else if (path.startsWith("/api/ratings") || path.startsWith("/ratings")) {
+                ratingController.handle(exchange);
             } else {
                 sendResponse(exchange, 404, "{\"error\": \"Route nicht gefunden\"}");
             }
         } catch (Exception e) {
             e.printStackTrace();
             sendResponse(exchange, 500, "{\"error\": \"Interner Serverfehler: " + e.getMessage() + "\"}");
-        }
-    }
-
-    private void handleMediaRoutes(HttpExchange exchange, String path, String method) throws IOException {
-        if ("GET".equalsIgnoreCase(method)) {
-            sendResponse(exchange, 200, "{\"message\": \"Media Liste\"}");
-        } else if ("POST".equalsIgnoreCase(method)) {
-            String body = readRequestBody(exchange);
-            sendResponse(exchange, 201, "{\"message\": \"Media erstellt\", \"data\": " + (body.isEmpty() ? "{}" : body) + "}");
-        } else {
-            sendResponse(exchange, 405, "{\"error\": \"Methode nicht erlaubt\"}");
-        }
-    }
-
-    private void handleUserRoutes(HttpExchange exchange, String path, String method) throws IOException {
-        if ("GET".equalsIgnoreCase(method)) {
-            sendResponse(exchange, 200, "{\"message\": \"User Liste\"}");
-        } else if ("POST".equalsIgnoreCase(method)) {
-            String body = readRequestBody(exchange);
-            sendResponse(exchange, 201, "{\"message\": \"User erstellt\"}");
-        } else {
-            sendResponse(exchange, 405, "{\"error\": \"Methode nicht erlaubt\"}");
-        }
-    }
-
-    private void handleRatingRoutes(HttpExchange exchange, String path, String method) throws IOException {
-        if ("GET".equalsIgnoreCase(method)) {
-            sendResponse(exchange, 200, "{\"message\": \"Rating Liste\"}");
-        } else if ("POST".equalsIgnoreCase(method)) {
-            String body = readRequestBody(exchange);
-            sendResponse(exchange, 201, "{\"message\": \"Rating abgegeben\"}");
-        } else {
-            sendResponse(exchange, 405, "{\"error\": \"Methode nicht erlaubt\"}");
-        }
-    }
-
-    private String readRequestBody(HttpExchange exchange) throws IOException {
-        try (InputStream is = exchange.getRequestBody()) {
-            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 

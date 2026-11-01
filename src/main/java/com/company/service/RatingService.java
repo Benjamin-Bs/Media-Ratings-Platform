@@ -4,12 +4,24 @@ import com.company.repository.RatingRepository;
 import com.company.models.Rating;
 import com.company.models.User;
 
+import java.util.List;
+
 public class RatingService {
 
-    RatingRepository ratingRepository;
+    private final RatingRepository ratingRepository;
 
     public RatingService(RatingRepository ratingRepository) {
         this.ratingRepository = ratingRepository;
+    }
+
+    // Lädt alle Ratings aus der Datenbank (für GET /ratings im Controller)
+    public List<Rating> getAllRatings() {
+        return ratingRepository.findAll();
+    }
+
+    // Optional: Lädt alle Ratings für einen bestimmten Medien-Eintrag
+    public List<Rating> getRatingsByMediaId(int mediaId) {
+        return ratingRepository.getRatingsByMediaId(mediaId);
     }
 
     public Rating addRating(User user, int mediaId, int stars, String comment) throws Exception {
@@ -37,5 +49,4 @@ public class RatingService {
         rating.getLikedByUserIds().add(user.getId());
         ratingRepository.updateRating(rating);
     }
-
 }

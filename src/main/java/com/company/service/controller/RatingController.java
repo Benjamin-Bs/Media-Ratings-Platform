@@ -6,13 +6,15 @@ import com.company.service.RatingService;
 import com.company.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
-public class RatingController {
+public class RatingController implements HttpHandler {
 
     private final RatingService ratingService;
     private final UserService userService;
@@ -24,13 +26,23 @@ public class RatingController {
         this.objectMapper = new ObjectMapper();
     }
 
+    @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String method = httpExchange.getRequestMethod();
         String path = httpExchange.getRequestURI().getPath();
 
         try {
-            if (method.equals("POST")) {
-                if (path.equals("/ratings")) {
+            // GET /ratings hinzugefügt: Lädt alle Ratings aus der Datenbank
+            if ("GET".equalsIgnoreCase(method)) {
+                if ("/ratings".equals(path) || "/ratings/".equals(path)) {
+                    List<Rating> ratings = ratingService.getAllRatings();
+                    sendResponse(httpExchange, 200, objectMapper.writeValueAsString(ratings));
+                    return;
+                }
+            }
+
+            if ("POST".equalsIgnoreCase(method)) {
+                if ("/ratings".equals(path) || "/ratings/".equals(path)) {
                     User user = getAuthenticatedUser(httpExchange);
 
                     String requestBody = readRequestBody(httpExchange);
@@ -50,7 +62,6 @@ public class RatingController {
                 if (path.startsWith("/ratings/") && path.endsWith("/like")) {
                     User user = getAuthenticatedUser(httpExchange);
 
-                    // Extrahiert die ID aus /ratings/{id}/like
                     String[] parts = path.split("/");
                     int ratingId = Integer.parseInt(parts[2]);
 

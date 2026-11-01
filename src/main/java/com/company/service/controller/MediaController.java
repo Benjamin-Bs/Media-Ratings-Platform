@@ -5,6 +5,7 @@ import com.company.service.MediaService;
 import com.company.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +13,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class MediaController {
+public class MediaController implements HttpHandler {
 
     private final MediaService mediaService;
     private final UserService userService;
@@ -24,25 +25,25 @@ public class MediaController {
         this.objectMapper = new ObjectMapper();
     }
 
+    @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String method = httpExchange.getRequestMethod();
         String path = httpExchange.getRequestURI().getPath();
 
         try {
-            if (method.equals("GET")) {
-                if (path.equals("/media")) {
+            if ("GET".equalsIgnoreCase(method)) {
+                if ("/media".equals(path) || "/media/".equals(path)) {
                     List<MediaEntrie> mediaList = mediaService.getAllMedia();
                     sendResponse(httpExchange, 200, objectMapper.writeValueAsString(mediaList));
                     return;
                 }
             }
 
-            if (method.equals("POST")) {
-                if (path.equals("/media")) {
+            if ("POST".equalsIgnoreCase(method)) {
+                if ("/media".equals(path) || "/media/".equals(path)) {
                     User user = getAuthenticatedUser(httpExchange);
 
                     String requestBody = readRequestBody(httpExchange);
-                    // Standardmäßig als Movie lesen; für Series/Game kann JSON nach Typ geparst werden
                     Movie movie = objectMapper.readValue(requestBody, Movie.class);
 
                     MediaEntrie createdMedia = mediaService.createMedia(movie, user);
@@ -51,7 +52,7 @@ public class MediaController {
                 }
             }
 
-            if (method.equals("DELETE")) {
+            if ("DELETE".equalsIgnoreCase(method)) {
                 if (path.startsWith("/media/")) {
                     User user = getAuthenticatedUser(httpExchange);
 

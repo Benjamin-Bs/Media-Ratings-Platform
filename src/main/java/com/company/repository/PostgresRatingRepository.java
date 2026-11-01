@@ -65,6 +65,24 @@ public class PostgresRatingRepository implements RatingRepository {
     }
 
     @Override
+    public List<Rating> findAll() {
+        List<Rating> ratings = new ArrayList<>();
+        String sql = "SELECT * FROM ratings";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                ratings.add(mapResultSetToRating(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ratings;
+    }
+
+    @Override
     public Rating getRatingById(int ratingId) {
         String sql = "SELECT * FROM ratings WHERE id = ?";
 

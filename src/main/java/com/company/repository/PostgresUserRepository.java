@@ -1,10 +1,10 @@
 package com.company.repository;
 
 import com.company.models.User;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class PostgresUserRepository implements UserRepository {
@@ -14,19 +14,43 @@ public class PostgresUserRepository implements UserRepository {
     }
 
     private void createTableIfNotExists() {
-        String sql = """
-                    CREATE TABLE IF NOT EXISTS users (
-                        id SERIAL PRIMARY KEY,
-                        username VARCHAR(255) NOT NULL UNIQUE,
-                        password VARCHAR(255) NOT NULL,
-                        token VARCHAR(255),
-                        fav_media_ids TEXT
-                    );
-                """;
+        String createTableSql = """
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(255) NOT NULL UNIQUE,
+                    password_hash VARCHAR(255),
+                    token VARCHAR(255),
+                    fav_media_ids TEXT
+                );
+            """;
+
+        // 1. Benenne 'password' um zu 'password_hash', falls 'password' noch existiert
+        String renameColumnSql = """
+                DO $$ 
+                BEGIN 
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name='users' AND column_name='password'
+                    ) THEN 
+                        ALTER TABLE users RENAME COLUMN password TO password_hash; 
+                    END IF; 
+                END $$;
+            """;
+
+        // 2. Stelle sicher, dass alle weiteren Spalten existieren
+        String addColumnsSql = """
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS token VARCHAR(255);
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS fav_media_ids TEXT;
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+
+            stmt.execute(createTableSql);
+            stmt.execute(renameColumnSql);
+            stmt.execute(addColumnsSql);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -34,13 +58,18 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public int createUser(User user) {
-        String sql = "INSERT INTO users (username, password, token, fav_media_ids) VALUES (?, ?, ?, ?) RETURNING id";
+        String sql = "INSERT INTO users (username, password_hash, token, fav_media_ids) VALUES (?, ?, ?, ?) RETURNING id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword());
+
+            String passToStore = (user.getPassword() != null && user.getPassword().startsWith("$2a$"))
+                    ? user.getPassword()
+                    : BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+
+            stmt.setString(2, passToStore);
             stmt.setString(3, user.getToken());
             stmt.setString(4, user.getFavMediaIds() != null ? joinIntegers(user.getFavMediaIds()) : "");
 
@@ -54,6 +83,43 @@ public class PostgresUserRepository implements UserRepository {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public boolean registerUser(String username, String rawPassword) {
+        String sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+
+        String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, hashedPassword);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean loginUser(String username, String rawPassword) {
+        String sql = "SELECT password_hash FROM users WHERE username = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String storedHash = rs.getString("password_hash");
+                return storedHash != null && BCrypt.checkpw(rawPassword, storedHash);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -115,7 +181,7 @@ public class PostgresUserRepository implements UserRepository {
 
     @Override
     public User updateUser(User user) {
-        String sql = "UPDATE users SET username = ?, password = ?, token = ?, fav_media_ids = ? WHERE id = ?";
+        String sql = "UPDATE users SET username = ?, password_hash = ?, token = ?, fav_media_ids = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -169,11 +235,11 @@ public class PostgresUserRepository implements UserRepository {
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String username = rs.getString("username");
-        String password = rs.getString("password");
+        String passwordHash = rs.getString("password_hash");
         String token = rs.getString("token");
         String favMediaRaw = rs.getString("fav_media_ids");
 
-        User user = new User(id, username, password);
+        User user = new User(id, username, passwordHash);
         user.setToken(token);
 
         if (favMediaRaw != null && !favMediaRaw.isBlank()) {
