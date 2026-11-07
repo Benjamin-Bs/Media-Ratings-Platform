@@ -1,0 +1,71 @@
+### 1. Benutzer erstellen (POST /api/users)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "username": "benjamin",
+  "password": "mySecurePassword123"
+}
+
+###
+
+### 2. Alle Benutzer abrufen (GET /api/users)
+GET http://localhost:8080/api/users
+
+###
+
+### 3. Neues Medium (Film) erstellen: Pirates of the Caribbean
+POST http://localhost:8080/api/media
+Content-Type: application/json
+
+{
+  "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+  "type": "MOVIE",
+  "description": "Der Schmied Will Turner schließt sich mit dem exzentrischen Piraten Captain Jack Sparrow zusammen, um seine große Liebe vor verfluchten Piraten zu retten.",
+  "releaseYear": 2003,
+  "genres": ["Action", "Adventure", "Fantasy"],
+  "ageRestriction": 12,
+  "creatorID": 1,
+  "durationMinutes": 143
+}
+
+###
+
+### 4. Neues Medium (Serie) erstellen (POST /api/media)
+POST http://localhost:8080/api/media
+Content-Type: application/json
+
+{
+  "title": "Arcane",
+  "type": "SERIES",
+  "description": "Zwei Schwestern kämpfen auf entgegengesetzten Seiten im Konflikt zwischen Städten.",
+  "releaseYear": 2021,
+  "genres": ["Animation", "Sci-Fi", "Fantasy"],
+  "ageRestriction": 16,
+  "creatorID": 1,
+  "seasonsCount": 2,
+  "episodesCount": 18
+}
+
+###
+
+### 5. Alle Medien abrufen (GET /api/media)
+GET http://localhost:8080/api/media
+
+###
+
+### 6. Neue Bewertung abgeben (POST /api/ratings)
+POST http://localhost:8080/api/ratings
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "mediaEntryId": 1,
+  "starValue": 5,
+  "comment": "Captain Jack Sparrow ist einfach legendär!"
+}
+
+###
+
+### 7. Alle Bewertungen abrufen (GET /api/ratings)
+GET http://localhost:8080/api/ratings
